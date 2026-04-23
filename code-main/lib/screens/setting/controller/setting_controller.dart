@@ -258,7 +258,6 @@ class SettingsController extends GetxController {
   //     ),
   //   );
   // }
-
   void logout() {
     Get.defaultDialog(
       title: 'Logout',
@@ -267,10 +266,27 @@ class SettingsController extends GetxController {
       textCancel: 'Cancel',
       confirmTextColor: Colors.white,
       buttonColor: Colors.red,
+
       onConfirm: () async {
-        Get.back();
-        await LocalUserService.instance.clear();
-        await _auth.signOut();
+        Get.back(); // close dialog
+
+        try {
+          // 1. clear local storage (SharedPreferences / custom storage)
+          await LocalUserService.instance.clear();
+
+          // 2. firebase / backend logout (if used)
+          await _auth.signOut();
+
+          // 3. navigate to login screen and clear stack
+          Get.offAllNamed(Routes.loginScreen);
+
+        } catch (e) {
+          Get.snackbar(
+            "Error",
+            "Logout failed",
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        }
       },
     );
   }

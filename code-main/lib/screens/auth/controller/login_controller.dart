@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../screen/Local_Storage.dart';
+
 class LoginController extends GetxController {
   final emailController    = TextEditingController();
   final passwordController = TextEditingController();
@@ -30,6 +32,9 @@ class LoginController extends GetxController {
         emailController.text.trim(),
         passwordController.text,
       );
+      await LocalStorage.setString('token', result.token);
+      await LocalStorage.setString('name', result.user.name);
+      await LocalStorage.setString('email', result.user.email);
       if (Get.isRegistered<SettingsController>()) {
         SettingsController.to.applyLocalUpdate(
           newName:  result.user.name,
