@@ -1,0 +1,12 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+
+class FirebaseService {
+  FirebaseService._();
+  static final FirebaseService instance = FirebaseService._();
+
+  Future<void> initialize() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp();
+  }
+}
