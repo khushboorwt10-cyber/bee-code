@@ -118,17 +118,17 @@ loading ? _courseGridShimmer() : _courseGrid(), // This now uses sections API
                     //     ),
                     //   ),
                     // ),
-                    SizedBox(height: 16.h),
-                    loading
-                        ? _horizontalCardShimmer(
-                            height: 310.h,
-                            cardWidth: 300.w,
-                          )
-                        : _trendingCoursesListFromApi(),
-                    SizedBox(height: 30.h),
+                   // SizedBox(height: 16.h),
+                    // loading
+                    //     ? _horizontalCardShimmer(
+                    //         height: 310.h,
+                    //         cardWidth: 300.w,
+                    //       )
+                    //     : _trendingCoursesListFromApi(),
+                    // SizedBox(height: 30.h),
                     // loading
                     //     ? _sectionShimmer(cardHeight: 340.h, cardWidth: 280.w)
-                    //     : _freeCoursesSection(),
+                    //     : _freeCoursesSect
                     SizedBox(height: 30.h),
                     loading
                         ? _sectionShimmer(cardHeight: 390.h, cardWidth: 320.w)

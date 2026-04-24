@@ -103,6 +103,22 @@ class HomeController extends GetxController {
   final ScrollController logoScrollController = ScrollController();
   Timer? _logoTimer;
 
+  List<SectionWithCourses> get uniqueSectionsWithCourses {
+    final seen = <String>{};
+    final List<SectionWithCourses> unique = [];
+
+    for (final item in sectionsWithCourses) {
+      final id = item.section.id;
+
+      if (!seen.contains(id)) {
+        seen.add(id);
+        unique.add(item);
+      }
+    }
+
+    return unique;
+  }
+
   // Trending courses
   List<Map<String, dynamic>> get trendingCourses {
     return apiTrendingCourses.map((course) {
@@ -119,7 +135,6 @@ class HomeController extends GetxController {
     }).toList();
   }
 
-  // Free courses getter
   Map<String, List<Map<String, dynamic>>> get freeCourses {
     final Map<String, List<Map<String, dynamic>>> result = {};
 
@@ -151,7 +166,7 @@ class HomeController extends GetxController {
   }
 
   // =========================
-  // FETCH HOME DATA (FIXED)
+  // FETCH HOME DATA
   // =========================
   Future<void> fetchHomeData() async {
     try {
@@ -173,13 +188,6 @@ class HomeController extends GetxController {
       apiTrendingCourses.value = (results[3] as List<CourseData>);
       apiFreeCourses.value = (results[4] as List<CourseData>);
 
-      debugPrint("✅ Sections: ${sections.length}");
-      debugPrint("✅ SectionsWithCourses: ${sectionsWithCourses.length}");
-
-      for (var item in sectionsWithCourses) {
-        debugPrint("📌 ${item.section.title} -> ${item.courses.length}");
-      }
-
       organizeFreeCourses();
     } catch (e) {
       errorMessage.value = e.toString();
@@ -189,9 +197,6 @@ class HomeController extends GetxController {
     }
   }
 
-  // =========================
-  // ORGANIZE FREE COURSES
-  // =========================
   void organizeFreeCourses() {
     final Map<String, List<CourseData>> organized = {};
 
