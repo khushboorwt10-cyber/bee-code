@@ -1,7 +1,7 @@
 import 'package:beecode/bottom_nav/controller/bottom_controller.dart';
 import 'package:beecode/screens/auth/controller/auth_controller.dart';
 import 'package:beecode/screens/auth/firebase/firebase_service.dart';
-import 'package:beecode/core/service/auth_service.dart';
+import 'package:beecode/screens/auth/screen/Local_Storage.dart';
 import 'package:beecode/screens/home/controller/home_controller.dart';
 import 'package:beecode/screens/utils/route.dart';
 import 'package:beecode/widget/recent_courses_service.dart';
@@ -11,10 +11,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-final RxString _currentRoute = ''.obs;
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await LocalStorage.init();
   await FirebaseService.instance.initialize();
 
   await FirebaseAppCheck.instance.activate(
@@ -34,7 +34,6 @@ Future<void> main() async {
     statusBarIconBrightness: Brightness.dark,
     systemNavigationBarColor: Colors.transparent,
     systemNavigationBarIconBrightness: Brightness.dark,
-    systemNavigationBarContrastEnforced: false,
   ));
 
   await SystemChrome.setPreferredOrientations([
@@ -50,7 +49,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLoggedIn = AuthService.instance.isLoggedIn;
+
+    // ✅ SAFE LOGIN CHECK (SharedPreferences based)
+    final token = LocalStorage.getString('token');
+    final isLoggedIn = token != null && token.isNotEmpty;
+
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
@@ -59,6 +62,7 @@ class MyApp extends StatelessWidget {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'BeeCode',
+
           theme: ThemeData(
             scaffoldBackgroundColor: Colors.white,
             appBarTheme: const AppBarTheme(
@@ -70,49 +74,46 @@ class MyApp extends StatelessWidget {
               ),
             ),
           ),
-          initialRoute: isLoggedIn ? Routes.home : Routes.loginScreen,
+
+          // 🔥 AUTH ROUTING FIXED
+          initialRoute: isLoggedIn
+              ? Routes.home
+              : Routes.loginScreen,
+
           getPages: AppPages.routes,
-          routingCallback: (routing) {
-            if (routing?.current != null) {
-              _currentRoute.value = routing!.current;
-            }
-          },
         );
       },
     );
   }
 }
-
-// ignore: unused_element
 class _GlobalFabWrapper extends StatelessWidget {
   final Widget child;
   const _GlobalFabWrapper({required this.child});
-static const _hiddenRoutes = {
-  Routes.loginScreen,
-  Routes.signUpScreen,
-  Routes.subscriptionScreen,
-  Routes.aiChatScreen,
-  Routes.beeBitesScreen,
-};
+
+  static const Set<String> _hiddenRoutes = {
+    Routes.loginScreen,
+    Routes.signUpScreen,
+    Routes.subscriptionScreen,
+    Routes.aiChatScreen,
+    Routes.beeBitesScreen,
+  };
 
   @override
   Widget build(BuildContext context) {
+    final route = Get.currentRoute;
+
+    final hidden = _hiddenRoutes.contains(route) || route.isEmpty;
+
     return Stack(
       children: [
         child,
 
-        Obx(() {
-         final hidden = _hiddenRoutes.contains(_currentRoute.value)
-    || _currentRoute.value.isEmpty;
-
-if (hidden) return const SizedBox.shrink();
-
-          return Positioned(
+        if (!hidden)
+          Positioned(
             bottom: 90.h,
             right: 16.w,
             child: const _GlobalFab(),
-          );
-        }),
+          ),
       ],
     );
   }
@@ -133,7 +134,7 @@ class _GlobalFab extends StatelessWidget {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color:  Colors.white.withOpacity(0.1),
+              color: Colors.black.withOpacity(0.15),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
